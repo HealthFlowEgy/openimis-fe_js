@@ -2,6 +2,9 @@
 // import "react-app-polyfill/stable";
 import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
+import createCache from "@emotion/cache";
+import { CacheProvider } from "@emotion/react";
+import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeProvider } from "@mui/material/styles";
 import { LinearProgress } from "@mui/material";
 import { Provider } from "react-redux";
@@ -92,6 +95,9 @@ const loadConfiguration = async () => {
 
 const bootLogoutPending = handleBootLogout();
 
+const ltrCache = createCache({ key: "mui" });
+const rtlCache = createCache({ key: "muirtl", stylisPlugins: [rtlPlugin] });
+
 const AppContainer = () => {
   const [appState, setAppState] = React.useState({
     isLoading: true,
@@ -125,33 +131,40 @@ const AppContainer = () => {
     initialize();
   }, []);
 
-  const themeColor = appState?.config?.["fe-core"]?.theme;
-  const dynamicTheme = createAppTheme(themeColor || {});
+  const themeConfig = appState?.config?.["fe-core"]?.theme || {};
+  const appDirection = themeConfig.direction === "rtl" ? "rtl" : "ltr";
+  const dynamicTheme = createAppTheme({ ...themeConfig, direction: appDirection });
+  const emotionCache = appDirection === "rtl" ? rtlCache : ltrCache;
   const logo = getConfiguredLogo(appState.config);
+
+  useEffect(() => {
+    document.documentElement.dir = appDirection;
+    document.documentElement.lang = themeConfig.locale || (appDirection === "rtl" ? "ar" : "en");
+  }, [appDirection, themeConfig.locale]);
+
+  const themed = (children) => (
+    <CacheProvider value={emotionCache}>
+      <ThemeProvider theme={dynamicTheme}>{children}</ThemeProvider>
+    </CacheProvider>
+  );
   const disableTextLogo = appState?.config?.["fe-core"]?.logo?.disableTextLogo || false;
 
   if (bootLogoutPending || appState.isLoading) {
     console.log("[openIMIS] App is loading...");
-    return (
-      <ThemeProvider theme={dynamicTheme}>
-        <LinearProgress className="bootstrap" />
-      </ThemeProvider>
-    );
+    return themed(<LinearProgress className="bootstrap" />);
   }
 
   if (appState.error) {
     console.error("[openIMIS] Fatal error state:", appState.error);
-    return (
-      <ThemeProvider theme={dynamicTheme}>
-        <IntlProvider locale="en" messages={messages_ref}>
-          <FatalError
-            error={{
-              code: appState.error.status,
-              message: appState.error.statusText,
-            }}
-          />
-        </IntlProvider>
-      </ThemeProvider>
+    return themed(
+      <IntlProvider locale={themeConfig.locale || "en"} messages={messages_ref}>
+        <FatalError
+          error={{
+            code: appState.error.status,
+            message: appState.error.statusText,
+          }}
+        />
+      </IntlProvider>,
     );
   }
 
@@ -160,11 +173,7 @@ const AppContainer = () => {
 
   if (!modulesManager) {
     console.log("[openIMIS] modulesManager not available, cannot render app");
-    return (
-      <ThemeProvider theme={dynamicTheme}>
-        <LinearProgress className="bootstrap" />
-      </ThemeProvider>
-    );
+    return themed(<LinearProgress className="bootstrap" />);
   }
 
   const reducers = modulesManager.getContribs("reducers").reduce((acc, r) => {
@@ -174,21 +183,24 @@ const AppContainer = () => {
   const middlewares = modulesManager.getContribs("middlewares");
 
   return (
-    <ThemeProvider theme={dynamicTheme}>
-      <Provider store={store(reducers, middlewares)}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <ModulesManagerProvider modulesManager={modulesManager}>
-            <App
-              basename={process.env.PUBLIC_URL}
-              localesManager={localesManager}
-              messages={messages_ref}
-              logo={logo}
-              disableTextLogo={disableTextLogo}
-            />
-          </ModulesManagerProvider>
-        </LocalizationProvider>
-      </Provider>
-    </ThemeProvider>
+    <CacheProvider value={emotionCache}>
+      <ThemeProvider theme={dynamicTheme}>
+        <Provider store={store(reducers, middlewares)}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <ModulesManagerProvider modulesManager={modulesManager}>
+              <App
+                basename={process.env.PUBLIC_URL}
+                localesManager={localesManager}
+                messages={messages_ref}
+                logo={logo}
+                applicationName={themeConfig.applicationName || "HealthFlow Payer"}
+                disableTextLogo={disableTextLogo}
+              />
+            </ModulesManagerProvider>
+          </LocalizationProvider>
+        </Provider>
+      </ThemeProvider>
+    </CacheProvider>
   );
 };
 

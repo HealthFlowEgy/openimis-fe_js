@@ -12,8 +12,9 @@ const defaultColors = {
   selectedTableRowColor: "rgba(0, 0, 0, 0.08)",
   hoveredTableRowColor: "rgba(0, 0, 0, 0.12)",
   toggledButtonColor: "#999999",
-  lockedBackgroundPattern:
-    "repeating-linear-gradient(45deg, #D3D3D3 1px, #D3D3D3 1px, #fff 10px, #fff 10px)",
+  lockedBackgroundPattern: "repeating-linear-gradient(45deg, #D3D3D3 1px, #D3D3D3 1px, #fff 10px, #fff 10px)",
+  direction: "ltr",
+  fontFamily: ['"Cairo"', '"IBM Plex Sans Arabic"', "Rubik", "Roboto", '"Helvetica Neue"', "sans-serif"].join(","),
 };
 
 const createAppTheme = (colorOverrides = {}) => {
@@ -29,6 +30,8 @@ const createAppTheme = (colorOverrides = {}) => {
     hoveredTableRowColor,
     toggledButtonColor,
     lockedBackgroundPattern,
+    direction,
+    fontFamily,
   } = { ...defaultColors, ...colorOverrides };
 
   const themeOptions = {
@@ -41,11 +44,12 @@ const createAppTheme = (colorOverrides = {}) => {
         xl: 1536,
       },
     },
+    direction,
     components: {
       MuiTableRow: {
         styleOverrides: {
           root: {
-            '&.Mui-selected': {
+            "&.Mui-selected": {
               backgroundColor: selectedTableRowColor,
             },
           },
@@ -74,7 +78,7 @@ const createAppTheme = (colorOverrides = {}) => {
       toggledButton: toggledButtonColor,
     },
     typography: {
-      fontFamily: ["Rubik", "Roboto", '"Helvetica Neue"', "sans-serif"].join(","),
+      fontFamily,
       fontSize: 14,
       fontWeightRegular: 300,
       fontWeightMedium: 400,
@@ -82,7 +86,7 @@ const createAppTheme = (colorOverrides = {}) => {
         fontSize: 20,
         fontWeight: 300,
       },
-    
+
       title: {
         fontSize: 20,
         fontWeight: 300,
@@ -110,10 +114,10 @@ const createAppTheme = (colorOverrides = {}) => {
       },
       iconSize: 32,
     },
-         menu: {
-       variant: "AppBar", 
-       drawer: {
-         width: "300px", // Must be string for CSS calc() in RequireAuth
+    menu: {
+      variant: "AppBar",
+      drawer: {
+        width: "300px", // Must be string for CSS calc() in RequireAuth
         fontSize: 16,
         fontWeight: 400,
         backgroundColor: primaryColor,
@@ -179,7 +183,7 @@ const createAppTheme = (colorOverrides = {}) => {
       row: {
         color: primaryColor,
         textAlign: "center",
-        '&:hover': {
+        "&:hover": {
           background: hoveredTableRowColor,
         },
       },
@@ -246,7 +250,7 @@ const createAppTheme = (colorOverrides = {}) => {
         backgroundColor: primaryColor,
         color: whiteColor,
         fontWeight: "bold",
-        '&:hover': {
+        "&:hover": {
           backgroundColor: alpha(primaryColor, 0.5),
           color: primaryColor,
         },
@@ -284,7 +288,7 @@ const createAppTheme = (colorOverrides = {}) => {
         justifyContent: "flex-end",
       },
     },
-   };
+  };
 
   let theme = createTheme(themeOptions);
 

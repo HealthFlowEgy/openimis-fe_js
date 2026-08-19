@@ -20,7 +20,7 @@ function getLatestMtime(dir) {
     }
   } catch (err) {
     // If dir doesn't exist, return 0 (e.g., no src/)
-    if (err.code === 'ENOENT') return 0;
+    if (err.code === "ENOENT") return 0;
     throw err;
   }
   return latestMtime;
@@ -44,7 +44,7 @@ function getEarliestMtime(dir) {
     }
   } catch (err) {
     // If dist/ doesn't exist, force build
-    if (err.code === 'ENOENT') return Infinity;
+    if (err.code === "ENOENT") return Infinity;
     throw err;
   }
   return earliestMtime;
@@ -52,7 +52,7 @@ function getEarliestMtime(dir) {
 
 function extractNpmPackageName(packageJsonPath) {
   try {
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
     return packageJson.name || null;
   } catch (error) {
     console.error(`Error reading package.json at ${packageJsonPath}: ${error.message}`);
@@ -89,11 +89,11 @@ function parseNpmBranch(npmStr) {
 }
 
 function extractModuleInfo(module, modulesInstallPath, branchOverride) {
-  const local = module.npm.match(/^.*file:/)
-  const github = module.npm.match(/github\.com/)
+  const local = module.npm.match(/^.*file:/);
+  const github = module.npm.match(/github\.com/);
   let modulePath, packageName, repoUrl, branch;
 
-  if(local){
+  if (local) {
     modulePath = path.join(modulesInstallPath, module.name);
     let pkg;
     try {
@@ -115,7 +115,7 @@ function extractModuleInfo(module, modulesInstallPath, branchOverride) {
     if (gitUrlMatch) {
       repoUrl = gitUrlMatch[1];
     } else {
-      repoUrl = module.npm.replace(/#.+$/,"");
+      repoUrl = module.npm.replace(/#.+$/, "");
     }
   }
 
@@ -126,9 +126,9 @@ function extractModuleInfo(module, modulesInstallPath, branchOverride) {
     path: modulePath,
     repoUrl: repoUrl,
     branch: branch,
-    packageName:packageName,
+    packageName: packageName,
     local: local,
-    github: github
+    github: github,
   };
 }
 
@@ -147,7 +147,9 @@ function installAndLinkModules(imisJsonPath, modulesInstallPath, branch) {
 
     if (info.github) {
       // Handle GitHub module: skip cloning, let openimis-config-vite.js handle package.json
-      console.log(`GitHub module ${info.name} detected - skipping local setup, will be handled by openimis-config-vite.js`);
+      console.log(
+        `GitHub module ${info.name} detected - skipping local setup, will be handled by openimis-config-vite.js`,
+      );
     } else {
       // Handle local/file modules: clone and prepare
       const branch = info.branch;
@@ -166,7 +168,7 @@ function installAndLinkModules(imisJsonPath, modulesInstallPath, branch) {
       }
 
       shell.cd(info.path);
-      if (branch !== null){
+      if (branch !== null) {
         try {
           console.log(`Attempting to checkout and pull ${branch} for ${info.name}...`);
           shell.exec(`git checkout ${branch}`, { silent: true });
@@ -183,20 +185,19 @@ function installAndLinkModules(imisJsonPath, modulesInstallPath, branch) {
   });
   //updatePackageInAssembly(imisJSON.modules, path.dirname(imisJsonPath), modulesInstallPath);
   generateViteConfig(imisJSON.modules, modulesInstallPath);
-
 }
 
-function  prepareModuleForLocalDevelopment(modulePath, moduleName, npmPackageName) {
+function prepareModuleForLocalDevelopment(modulePath, moduleName, npmPackageName) {
   shell.cd(modulePath);
   console.log(`Preparing ${moduleName} for local development...`);
   shell.exec("rm -rf node_modules");
   shell.exec("rm -f package-lock.json");
-  const srcDir = path.join(modulePath, 'src');
-  const distDir = path.join(modulePath, 'dist');
+  const srcDir = path.join(modulePath, "src");
+  const distDir = path.join(modulePath, "dist");
   // Check modiication times
-  const srcMtime =  getLatestMtime(srcDir);
-  const distMtime =  getEarliestMtime(distDir);
-  
+  const srcMtime = getLatestMtime(srcDir);
+  const distMtime = getEarliestMtime(distDir);
+
   const installResult = shell.exec("npm install --include=dev --ignore-scripts --legacy-peer-deps", { silent: false });
   if (installResult.code !== 0) {
     console.error(`npm install failed for ${moduleName}: ${installResult.stderr}`);
@@ -220,7 +221,6 @@ function  prepareModuleForLocalDevelopment(modulePath, moduleName, npmPackageNam
     console.error(`Error reading ${moduleName}/package.json: ${error.message}`);
     throw error;
   }
-
 }
 
 function updatePackageInAssembly(modules, basePath, modulesInstallPath) {
@@ -281,12 +281,12 @@ function generateViteConfig(modules, modulesInstallPath) {
   }
 
   // Step 1: Remove all lines containing //DYNAMIC_ALIAS,
-  const lines = viteConfigContent.split('\n');
-  const cleanedLines = lines.filter(line => !line.includes('//DYNAMIC_ALIAS,'));
-  viteConfigContent = cleanedLines.join('\n');
+  const lines = viteConfigContent.split("\n");
+  const cleanedLines = lines.filter((line) => !line.includes("//DYNAMIC_ALIAS,"));
+  viteConfigContent = cleanedLines.join("\n");
 
   // Step 2: Find //<<DYNAMIC_ALIAS_PLACEHOLDER>>
-  const placeholder = '//<<DYNAMIC_ALIAS_PLACEHOLDER>>';
+  const placeholder = "//<<DYNAMIC_ALIAS_PLACEHOLDER>>";
   const placeholderIndex = viteConfigContent.indexOf(placeholder);
   if (placeholderIndex === -1) {
     console.error("Placeholder not found in vite.config.js.");
@@ -296,16 +296,19 @@ function generateViteConfig(modules, modulesInstallPath) {
   // Step 3: Inject new aliases on the line(s) after the placeholder
   const localModules = modules.filter((module) => !module.npm.match(/github\.com/));
   if (localModules.length > 0) {
-    const aliases = localModules.map((module) => {
-      const info = extractModuleInfo(module, modulesInstallPath, null);
-      const modulePath = path.resolve(info.path).replace(/\\/g, "/");
-      return `      "${info.packageName}": path.resolve('${modulePath}','src'), //DYNAMIC_ALIAS,`;
-    }).join('\n');
+    const aliases = localModules
+      .map((module) => {
+        const info = extractModuleInfo(module, modulesInstallPath, null);
+        const modulePath = path.resolve(info.path).replace(/\\/g, "/");
+        return `      "${info.packageName}": path.resolve('${modulePath}','src'), //DYNAMIC_ALIAS,`;
+      })
+      .join("\n");
 
-    const endOfPlaceholderLine = viteConfigContent.indexOf('\n', placeholderIndex);
+    const endOfPlaceholderLine = viteConfigContent.indexOf("\n", placeholderIndex);
     viteConfigContent =
       viteConfigContent.substring(0, endOfPlaceholderLine + 1) +
-      aliases + '\n' +
+      aliases +
+      "\n" +
       viteConfigContent.substring(endOfPlaceholderLine + 1);
   }
 
@@ -328,7 +331,7 @@ function main(configPath, modulesPath) {
 
   console.log(`Setting local npm cache`);
 
-  shell.exec(`npm config set cache ${path.join(modulesInstallPath, 'npm-cache')}`);
+  shell.exec(`npm config set cache ${path.join(modulesInstallPath, "npm-cache")}`);
 
   //shell.exec(`find . -type d -iname node_modules -exec rm -rf {} \;)
   try {
@@ -348,30 +351,31 @@ function main(configPath, modulesPath) {
 
 if (require.main === module) {
   const argv = yargs
-    .option('config', {
-      alias: 'c',
-      description: 'Path to openimis.json',
-      type: 'string',
+    .option("config", {
+      alias: "c",
+      description: "Path to openimis.json",
+      type: "string",
       default: (() => {
-        const devConfig = path.join(__dirname, '..', 'openimis-dev.json');
-        const mainConfig = path.join(__dirname, '..', 'openimis.json');
+        const devConfig = path.join(__dirname, "..", "openimis-dev.json");
+        const mainConfig = path.join(__dirname, "..", "openimis.json");
         return fs.existsSync(devConfig) ? devConfig : mainConfig;
       })(),
     })
-    .option('path', {
-      alias: 'p',
-      description: 'Path to modules installation directory',
-      type: 'string',
-      default: '../frontend-packages',
+    .option("path", {
+      alias: "p",
+      description: "Path to modules installation directory",
+      type: "string",
+      default: "../frontend-packages",
     })
-    .option('host', {
-      alias: 'H',
-      description: 'Expose Vite server to network',
-      type: 'boolean',
+    .option("host", {
+      alias: "H",
+      description: "Expose Vite server to network",
+      type: "boolean",
       default: false,
     })
     .help()
-    .alias('help', 'h')
+    .alias("help", "h")
+    .parse();
 
   console.log(`dev entrypoint, p: ${argv.path}, c: ${argv.config}, host: ${argv.host}`);
   main(argv.config, argv.path);
