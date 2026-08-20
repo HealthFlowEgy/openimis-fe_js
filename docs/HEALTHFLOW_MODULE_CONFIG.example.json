@@ -1,0 +1,18 @@
+{
+  "fe-core": {
+    "theme": {
+      "direction": "rtl",
+      "locale": "ar-EG",
+      "applicationName": "HealthFlow Payer",
+      "primaryColor": "#006273",
+      "currency": {
+        "code": "EGP",
+        "symbol": "ج.م",
+        "fractionDigits": 2
+      }
+    }
+  },
+  "fe-language_ar": {
+    "enabled": true
+  }
+}

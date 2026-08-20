@@ -15,6 +15,7 @@ const defaultColors = {
   lockedBackgroundPattern: "repeating-linear-gradient(45deg, #D3D3D3 1px, #D3D3D3 1px, #fff 10px, #fff 10px)",
   direction: "ltr",
   fontFamily: ['"Cairo"', '"IBM Plex Sans Arabic"', "Rubik", "Roboto", '"Helvetica Neue"', "sans-serif"].join(","),
+  currency: { code: "USD", symbol: "$", fractionDigits: 2 },
 };
 
 const createAppTheme = (colorOverrides = {}) => {
@@ -32,6 +33,7 @@ const createAppTheme = (colorOverrides = {}) => {
     lockedBackgroundPattern,
     direction,
     fontFamily,
+    currency,
   } = { ...defaultColors, ...colorOverrides };
 
   const themeOptions = {
@@ -45,6 +47,9 @@ const createAppTheme = (colorOverrides = {}) => {
       },
     },
     direction,
+    healthflow: {
+      currency,
+    },
     components: {
       MuiTableRow: {
         styleOverrides: {
