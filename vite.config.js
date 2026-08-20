@@ -9,15 +9,19 @@ import path from "path";
 export default defineConfig(({ mode }) => ({
   plugins: [
     react({
-      jsxRuntime: 'automatic',
-      jsxImportSource: '@emotion/react',
-      include: /.(jsx|js|ts|tsx)$/, 
+      jsxRuntime: "automatic",
+      jsxImportSource: "@emotion/react",
+      include: /.(jsx|js|ts|tsx)$/,
     }),
     svgr(),
     envCompatible(),
-    ...(mode === 'production' ? [legacy({
-      targets: [">0.2%", "not dead", "not op_mini all"],
-    })] : []),
+    ...(mode === "production"
+      ? [
+          legacy({
+            targets: [">0.2%", "not dead", "not op_mini all"],
+          }),
+        ]
+      : []),
     createHtmlPlugin({
       minify: true,
       inject: {
@@ -69,10 +73,17 @@ export default defineConfig(({ mode }) => ({
     ],
     alias: {
       //<<DYNAMIC_ALIAS_PLACEHOLDER>>
-      
+      "@openimis/fe-core": path.resolve("../../repos/openimis-fe-core_js", "src"), //DYNAMIC_ALIAS,
+      "@openimis/fe-home": path.resolve("../../repos/openimis-fe-home_js", "src"), //DYNAMIC_ALIAS,
+      "@openimis/fe-location": path.resolve("../../repos/openimis-fe-location_js", "src"), //DYNAMIC_ALIAS,
+      "@openimis/fe-insuree": path.resolve("../../repos/openimis-fe-insuree_js", "src"), //DYNAMIC_ALIAS,
+      "@openimis/fe-claim": path.resolve("../../repos/openimis-fe-claim_js", "src"), //DYNAMIC_ALIAS,
+      "@openimis/fe-language_fr": path.resolve("../../repos/openimis-fe-language_fr_js", "src"), //DYNAMIC_ALIAS,
+      "@healthflow/fe-language_ar": path.resolve("../../openimis-fe-language_ar_js", "src"), //DYNAMIC_ALIAS,
+
       "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
-            "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime"),
-            "react/jsx-dev-runtime": path.resolve(__dirname, "./node_modules/react/jsx-dev-runtime"),
+      "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime"),
+      "react/jsx-dev-runtime": path.resolve(__dirname, "./node_modules/react/jsx-dev-runtime"),
       "lodash": path.resolve(__dirname, "./node_modules/lodash"),
       "lodash-uuid": path.resolve(__dirname, "./node_modules/lodash-uuid"),
       "react-redux": path.resolve(__dirname, "./node_modules/react-redux"),
@@ -83,20 +94,14 @@ export default defineConfig(({ mode }) => ({
       "@mui/x-date-pickers": path.resolve(__dirname, "./node_modules/@mui/x-date-pickers"),
       "@mui/x-date-pickers/LocalizationProvider": path.resolve(
         __dirname,
-        "./node_modules/@mui/x-date-pickers/LocalizationProvider"
+        "./node_modules/@mui/x-date-pickers/LocalizationProvider",
       ),
-      "@mui/x-date-pickers/AdapterDayjs": path.resolve(
-        __dirname,
-        "./node_modules/@mui/x-date-pickers/AdapterDayjs"
-      ),
+      "@mui/x-date-pickers/AdapterDayjs": path.resolve(__dirname, "./node_modules/@mui/x-date-pickers/AdapterDayjs"),
       "@emotion/react": path.resolve(__dirname, "./node_modules/@emotion/react"),
       "@emotion/styled": path.resolve(__dirname, "./node_modules/@emotion/styled"),
       "@emotion/cache": path.resolve(__dirname, "./node_modules/@emotion/cache"),
       "@mui/utils": path.resolve(__dirname, "./node_modules/@mui/utils/esm"),
-      "@mui/utils/deepmerge": path.resolve(
-        __dirname,
-        "./node_modules/@mui/utils/esm/deepmerge/index.js"
-      ),
+      "@mui/utils/deepmerge": path.resolve(__dirname, "./node_modules/@mui/utils/esm/deepmerge/index.js"),
       "@mui/private-theming": path.resolve(__dirname, "./node_modules/@mui/private-theming"),
       "@mui/styled-engine": path.resolve(__dirname, "./node_modules/@mui/styled-engine"),
       "clsx": path.resolve(__dirname, "./node_modules/clsx"),
@@ -110,11 +115,11 @@ export default defineConfig(({ mode }) => ({
       "react-date-object": path.resolve(__dirname, "./node_modules/react-date-object"),
       "react-date-object/calendars/gregorian": path.resolve(
         __dirname,
-        "./node_modules/react-date-object/calendars/gregorian"
+        "./node_modules/react-date-object/calendars/gregorian",
       ),
       "react-date-object/locales/gregorian_en": path.resolve(
         __dirname,
-        "./node_modules/react-date-object/locales/gregorian_en"
+        "./node_modules/react-date-object/locales/gregorian_en",
       ),
       "dayjs": path.resolve(__dirname, "./node_modules/dayjs"),
       "moment": path.resolve(__dirname, "./node_modules/moment"),
@@ -145,9 +150,9 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
       },
       "/opensearch": {
-      target: "http://opensearch:5410",
-      changeOrigin: true,
-    }
+        target: "http://opensearch:5410",
+        changeOrigin: true,
+      },
     },
   },
   optimizeDeps: {
@@ -191,22 +196,22 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist",
     assetsDir: "static",
     sourcemap: true,
-    minify: mode === 'production',
+    minify: mode === "production",
     rollupOptions: {
       maxParallelFileOps: 1,
-       output: {
-         manualChunks: (id) => {
-           if (["react", "@mui/material"].some(dep => id.includes(dep))) {
-             return 'framework';
-           }
-           if (["react-dom", "react-redux", "redux"].some(dep => id.includes(dep))) {
-             return 'fm-addin';
-           }
-           if (id.includes('CoreModule')) {
-             return 'core';
-           }
-         },
-       },
+      output: {
+        manualChunks: (id) => {
+          if (["react", "@mui/material"].some((dep) => id.includes(dep))) {
+            return "framework";
+          }
+          if (["react-dom", "react-redux", "redux"].some((dep) => id.includes(dep))) {
+            return "fm-addin";
+          }
+          if (id.includes("CoreModule")) {
+            return "core";
+          }
+        },
+      },
     },
     commonjsOptions: {
       requireReturnsDefault: "auto",
